@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+bot.db
+uploads/memes/
+uploads/audio/
+*.js.map
