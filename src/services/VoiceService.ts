@@ -38,7 +38,7 @@ class VoiceService {
     });
 
     try {
-      await entersState(connection, VoiceConnectionStatus.Ready, 10_000);
+      await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
 
       // Spawn ffmpeg to transcode to raw signed-16-bit PCM (Discord's required format).
       const ffmpeg = spawn(this.ffmpegPath, [
@@ -88,7 +88,7 @@ class VoiceService {
     });
 
     try {
-      await entersState(connection, VoiceConnectionStatus.Ready, 10_000);
+      await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
 
       // -ss before -i does a fast keyframe seek — accurate enough for audio.
       // -to is the absolute end timestamp in the source (not duration).
