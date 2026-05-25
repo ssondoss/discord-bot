@@ -74,7 +74,12 @@ class VoiceService {
    *
    * The bot disconnects when the stream ends or an error occurs.
    */
-  async playStream(member: GuildMember, url: string): Promise<void> {
+  async playStream(
+    member: GuildMember,
+    url: string,
+    startTime?: string,
+    endTime?: string,
+  ): Promise<void> {
     const voiceChannel = member.voice.channel as VoiceChannel;
     const connection = joinVoiceChannel({
       channelId: voiceChannel.id,
@@ -85,17 +90,23 @@ class VoiceService {
     try {
       await entersState(connection, VoiceConnectionStatus.Ready, 10_000);
 
-      const ffmpeg = spawn(this.ffmpegPath, [
+      // -ss before -i does a fast keyframe seek — accurate enough for audio.
+      // -to is the absolute end timestamp in the source (not duration).
+      const args: string[] = [
         '-reconnect',           '1',
         '-reconnect_streamed',  '1',
         '-reconnect_delay_max', '5',
+        ...(startTime ? ['-ss', startTime] : []),
         '-i', url,
-        '-vn',          // discard any video stream in the source
+        ...(endTime   ? ['-to', endTime]   : []),
+        '-vn',
         '-f', 's16le',
         '-ar', '48000',
         '-ac', '2',
         'pipe:1',
-      ]);
+      ];
+
+      const ffmpeg = spawn(this.ffmpegPath, args);
 
       const resource = createAudioResource(ffmpeg.stdout!, { inputType: StreamType.Raw });
       const player = createAudioPlayer();
